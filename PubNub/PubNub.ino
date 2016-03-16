@@ -31,7 +31,7 @@ void random_uuid() {
 }
 
 unsigned long start_time;
-unsigned long timeout_time = 5000;
+unsigned long timeout_time = 4000;
 
 void setup()
 {
@@ -41,7 +41,6 @@ void setup()
   pinMode(pinBt1, INPUT);
   pinMode(pinBt2, INPUT);
   pinMode(pinBt3, INPUT);
-
 
   pinMode(pinLed1, OUTPUT);
   pinMode(pinLed2, OUTPUT);
@@ -148,27 +147,56 @@ void loop()
       analogWrite(pinLed3, value3);
     }
   }
+  
   delay(1000);
-
+  
+  
+  //Publish status
   if ((millis() - start_time) > timeout_time) {
     start_time = millis();
-    
+
     Serial.println("publishing bt status");
     //  publish
     EthernetClient *pClient;
 
     StaticJsonBuffer<200> jsonCreatorBuffer;
     JsonObject& rootCreator = jsonCreatorBuffer.createObject();
-    rootCreator["bt1"] = "1";
-    rootCreator["bt2"] = "1";
-    rootCreator["bt3"] = "1";
+
+    bool button1State = digitalRead(pinBt1);
+    bool button2State = digitalRead(pinBt2);
+    bool button3State = digitalRead(pinBt3);
+    
+    //bt1
+    if (button1State){
+      rootCreator["bt1"] = "1";
+    }
+    else{
+      rootCreator["bt1"] = "0";
+    }
+  
+    //bt2
+    if (button2State){
+      rootCreator["bt2"] = "1";
+    }
+    else{
+      rootCreator["bt2"] = "0";
+    }
+      
+    //bt3
+    if (button3State){
+      rootCreator["bt3"] = "1";
+    }
+    else{
+      rootCreator["bt3"] = "0";
+    }
 
     char buffer[256];
     rootCreator.printTo(buffer, sizeof(buffer));
-
+  
     Serial.print("publishing message: ");
     Serial.println(buffer);
-
+    rootCreator.printTo(Serial);
+    
     pClient = PubNub.publish(channel, buffer);
     if (!pClient) {
       Serial.println("publishing error");
