@@ -271,8 +271,6 @@ void loop() {
           client.flush();
           Serial.println("We have a new client: ");
           Serial.println(i);
-          client.print("Hello, client number: ");
-          client.println(i);
           break;
         }
       }
